@@ -70,7 +70,7 @@ class User(db.Model):
         return self.followed.filter(followers.c.followed_id == user.id).count() > 0
 
     def followed_posts(self):
-        return Posts.query.join(followers, (followers.c.followed_id == Posts.user.id)).filter(followers.c.follower_id
+        return Posts.query.join(followers, (followers.c.followed_id == Posts.user_id)).filter(followers.c.follower_id
                                                                                              == self.id). order_by(
             Posts.timestamp.desc())
 
