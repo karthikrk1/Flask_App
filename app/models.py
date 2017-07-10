@@ -69,6 +69,11 @@ class User(db.Model):
     def is_following(self, user):
         return self.followed.filter(followers.c.followed_id == user.id).count() > 0
 
+    def followed_posts(self):
+        return Posts.query.join(followers, (followers.c.followed_id == Posts.user.id)).filter(followers.c.follower_id
+                                                                                             == self.id). order_by(
+            Posts.timestamp.desc())
+
 class Posts(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.String(140))
