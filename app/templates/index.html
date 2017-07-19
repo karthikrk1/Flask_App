@@ -25,6 +25,6 @@
     {% endfor %}
     {% if posts.has_prev %}<a href="{{ url_for('index', page=posts.prev_num) }}">&lt;&lt; Newer posts</a>
     {% else %}&lt;&lt; Newer Posts{% endif %} |
-    {% if posts.has_next %}<a href="{{ url_for('index', page=posts.next_num) }}">&gt;&gt; Older posts</a>
-    {% else %}&gt;&gt; Older posts{% endif %}
+    {% if posts.has_next %}<a href="{{ url_for('index', page=posts.next_num) }}">Older posts &gt;&gt;</a>
+    {% else %}Older posts &gt;&gt;{% endif %}
 {% endblock %}

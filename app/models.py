@@ -1,5 +1,12 @@
-from app import db
+from app import db, app
 from hashlib import md5
+import sys
+
+if sys.version_info >= (3,0):
+    enable_search = False
+else:
+    enable_search = True
+    import flask_whooshalchemy as whoosh
 
 followers = db.Table('followers',
                      db.Column('follower_id', db.Integer, db.ForeignKey('user.id')),
@@ -44,18 +51,6 @@ class User(db.Model):
     def avatar(self, size):
         return 'http://www.gravatar.com/avatar/%s?d=mm&s=%d' % (md5(self.email.encode('utf-8')).hexdigest(), size)
 
-    @staticmethod
-    def make_unique_nickname(nickname):
-        if User.query.filter_by(nickname=nickname).first() is None:
-            return nickname
-        version=2
-        while True:
-            new_nickname = nickname + str(version)
-            if User.query.filter_by(nickname=new_nickname).first() is None:
-                break
-            version+=1
-        return new_nickname
-
     def follow(self, user):
         if not self.is_following(user):
             self.followed.append(user)
@@ -70,11 +65,25 @@ class User(db.Model):
         return self.followed.filter(followers.c.followed_id == user.id).count() > 0
 
     def followed_posts(self):
-        return Posts.query.join(followers, (followers.c.followed_id == Posts.user_id)).filter(followers.c.follower_id
-                                                                                             == self.id). order_by(
-            Posts.timestamp.desc())
+        return Posts.query.join(followers, (followers.c.followed_id == Posts.user_id)).filter(followers.c.follower_id == self.id).order_by(Posts.timestamp.desc())
+
+    @staticmethod
+    def make_unique_nickname(nickname):
+        if User.query.filter_by(nickname=nickname).first() is None:
+            return nickname
+        version=2
+        while True:
+            new_nickname = nickname + str(version)
+            if User.query.filter_by(nickname=new_nickname).first() is None:
+                break
+            version+=1
+        return new_nickname
+
+
 
 class Posts(db.Model):
+    __searchable__ = ['body']
+
     id = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.String(140))
     timestamp = db.Column(db.DateTime)
@@ -82,4 +91,8 @@ class Posts(db.Model):
 
     def __repr__(self):
         return '<Post %r>' % (self.body)
+
+if enable_search:
+    whoosh.whoosh_index(app, Posts)
+
 
