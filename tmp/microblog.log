@@ -50,3 +50,7 @@
 2017-07-19 16:24:10,707 INFO: microblog startup [in app\__init__.py:36]
 2017-07-19 16:43:31,721 INFO: microblog startup [in H:\Flask_App\app\__init__.py:36]
 2017-07-19 16:43:54,210 INFO: microblog startup [in H:\Flask_App\app\__init__.py:36]
+2017-07-19 16:53:39,977 INFO: microblog startup [in H:\Flask_App\app\__init__.py:36]
+2017-07-20 09:30:03,196 INFO: microblog startup [in app\__init__.py:38]
+2017-07-20 10:06:03,470 INFO: microblog startup [in H:\Flask_App\app\__init__.py:38]
+2017-07-20 10:06:18,877 INFO: microblog startup [in H:\Flask_App\app\__init__.py:38]
