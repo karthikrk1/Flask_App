@@ -6,17 +6,21 @@ from flask_openid import OpenID
 from config import basedir, ADMINS, MAIL_SERVER, MAIL_PORT, MAIL_USERNAME, MAIL_PASSWORD
 from flask_mail import Mail
 from .momentjs import momentjs
+from flask_babel import Babel, lazy_gettext
 
 app = Flask(__name__)
 app.config.from_object('config')
 app.jinja_env.globals['momentjs']=momentjs
 db = SQLAlchemy(app)
-mail = Mail(app)
+
 
 lm = LoginManager()
 lm.init_app(app)
 lm.login_view = 'login'
+lm.login_message = lazy_gettext('Please login to access this page.')
 oid = OpenID(app, os.path.join(basedir, 'tmp'))
+mail = Mail(app)
+babel = Babel(app)
 
 if not app.debug:
     import logging

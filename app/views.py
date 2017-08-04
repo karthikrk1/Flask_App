@@ -1,11 +1,16 @@
-from app import app, db, lm, oid
+from app import app, db, lm, oid, babel
 from flask import render_template, flash, redirect, session, url_for, request, g
 from .forms import LoginForm, EditForm, PostForm, SearchForm
 from .models import User, Posts
 from flask_login import login_user, logout_user, current_user, login_required
 from datetime import datetime
-from config import POSTS_PER_PAGE, MAX_SEARCH_RESULTS
+from config import POSTS_PER_PAGE, MAX_SEARCH_RESULTS, LANGUAGES
 from .emails import follower_notification
+from flask_babel import gettext
+
+@babel.localeselector
+def get_locale():
+    return request.accept_languages.best_match(LANGUAGES.keys())
 
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/index', methods=['GET', 'POST'])
@@ -48,7 +53,7 @@ def load_user(id):
 @oid.after_login
 def after_login(resp):
     if resp.email is None or resp.email == "":
-        flash('Invalid Login. Please try again!')
+        flash(gettext('Invalid Login. Please try again!'))
         return redirect(url_for('login'))
     user = User.query.filter_by(email=resp.email).first()
     if user is None:
@@ -56,6 +61,7 @@ def after_login(resp):
         if nickname is None or nickname == "":
             nickname = resp.email.split('@')[0]
         nickname = User.make_unique_nickname(nickname)
+        nickname = User.make_valid_nickname(nickname)
         user = User(nickname=nickname, email=resp.email)
         db.session.add(user)
         db.session.commit()
