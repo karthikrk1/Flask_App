@@ -7,6 +7,7 @@ from config import basedir, ADMINS, MAIL_SERVER, MAIL_PORT, MAIL_USERNAME, MAIL_
 from flask_mail import Mail
 from .momentjs import momentjs
 from flask_babel import Babel, lazy_gettext
+from flask.json import JSONEncoder
 
 app = Flask(__name__)
 app.config.from_object('config')
@@ -21,6 +22,20 @@ lm.login_message = lazy_gettext('Please login to access this page.')
 oid = OpenID(app, os.path.join(basedir, 'tmp'))
 mail = Mail(app)
 babel = Babel(app)
+
+class CustomJSONEncoder(JSONEncoder):
+    """This class adds support for lazy translation texts to Flask's JSON Encoder.
+    This is necessary when flashing translated texts."""
+    def default(self, obj):
+        from speaklater import is_lazy_string
+        if is_lazy_string(obj):
+            try:
+                return unicode(obj)
+            except NameError:
+                return str(obj)
+        return super(CustomJSONEncoder, self).default(obj)
+
+app.json_encoder = CustomJSONEncoder
 
 if not app.debug:
     import logging

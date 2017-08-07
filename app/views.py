@@ -22,7 +22,7 @@ def index(page=1):
         post = Posts(body=form.post.data, timestamp=datetime.utcnow(), author=g.user)
         db.session.add(post)
         db.session.commit()
-        flash('Your post is now live!')
+        flash(gettext('Your post is now live!'))
         return redirect(url_for('index'))
     posts = g.user.followed_posts().paginate(page, POSTS_PER_PAGE, False).items
     return render_template('index.html',
@@ -83,6 +83,7 @@ def before_request():
         db.session.add(g.user)
         db.session.commit()
         g.search_form = SearchForm()
+    g.locale = get_locale()
 
 @app.route('/logout')
 def logout():
@@ -94,7 +95,7 @@ def logout():
 def user(nickname, page=1):
     user = User.query.filter_by(nickname=nickname).first()
     if user == None:
-        flash('User %s not found!!!' % nickname)
+        flash(gettext('User %(nickname)s not found!!!', nickname=nickname))
         return redirect(url_for('index'))
     posts = user.posts.paginate(page, POSTS_PER_PAGE, False).items
     return render_template('user.html',
@@ -110,7 +111,7 @@ def edit():
         g.user.about_me = form.about_me.data
         db.session.add(g.user)
         db.session.commit()
-        flash('Your changes have been saved!')
+        flash(gettext('Your changes have been saved!'))
         return redirect(url_for('edit'))
     else:
         form.nickname.data = g.user.nickname
@@ -134,15 +135,15 @@ def follow(nickname):
         flash('User %s is not found.' % nickname)
         return redirect(url_for('index'))
     if user == g.user:
-        flash('You can\'t follow yourself.')
+        flash(gettext('You can\'t follow yourself.'))
         return redirect(url_for('user', nickname=nickname))
     u = g.user.follow(user)
     if u is None:
-        flash('Cannot follow ' + nickname+'.' )
+        flash(gettext('Cannot follow %(nickname)s.', nickname=nickname))
         return redirect(url_for('user', nickname=nickname))
     db.session.add(u)
     db.session.commit()
-    flash('You are now following '+nickname+'!')
+    flash(gettext('You are now following %(nickname)s!', nickname=nickname))
     #follower_notification(user, g.user)
     return redirect(url_for('user', nickname=nickname))
 
@@ -151,18 +152,18 @@ def follow(nickname):
 def unfollow(nickname):
     user = User.query.filter_by(nickname=nickname).first()
     if user is None:
-        flash('User %s is not found.' % nickname)
+        flash(gettext('User %(nickname)s is not found.', nickname=nickname))
         return redirect(url_for('index'))
     if user == g.user:
-        flash('You can\'t unfollow yourself.')
+        flash(gettext('You can\'t unfollow yourself.'))
         return redirect(url_for('user', nickname=nickname))
     u = g.user.unfollow(user)
     if u is None:
-        flash('Cannot unfollow ' + nickname + '.')
+        flash(gettext('Cannot unfollow %(nickname)s.', nickname=nickname))
         return redirect(url_for('user', nickname=nickname))
     db.session.add(u)
     db.session.commit()
-    flash('You have stopped following '+nickname+'!')
+    flash(gettext('You have stopped following %(nickname)s!', nickname=nickname))
     return redirect(url_for('user', nickname=nickname))
 
 @app.route('/search', methods=['POST'])
